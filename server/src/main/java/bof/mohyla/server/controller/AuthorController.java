@@ -28,32 +28,35 @@ public class AuthorController {
 
     @GetMapping("/api/v1/authors/{id}")
     public Author getSingleAuthor(@PathVariable UUID id) {
-        Optional<Author> author = authorRepository.findById(id);
+        Optional<Author> searchResult = authorRepository.findById(id);
 
-        if(author.isEmpty()) {
+        if(searchResult.isEmpty()) {
             throw new RuntimeException("Author with id: " + id + " is not found");
         }
 
-        return author.get();
+        Author author = searchResult.get();
+
+        return author;
     }
 
-    @PostMapping("/api/v1/authors")
+    @PostMapping("/api/v1/authors/")
     public Author createAuthor(@RequestBody Author author) {
         return authorRepository.save(author);
     }
 
     @PutMapping("/api/v1/authors/{id}")
-    public Author editAuthor(@PathVariable UUID id, @RequestBody Author author) {
-        Optional<Author> searchRes = authorRepository.findById(id);
+    public Author editAuthor(@PathVariable UUID id, @RequestBody Author updatedAuthor) {
+        Optional<Author> searchResult = authorRepository.findById(id);
         
-        if(searchRes.isEmpty()) {
+        if(searchResult.isEmpty()) {
             throw new RuntimeException("Author with id: " + id + " is not found");
         }
 
-        searchRes.get().setName(author.getName());
-        authorRepository.save(searchRes.get());
+        Author author = searchResult.get();
+        author.setName(updatedAuthor.getName());
 
-        return searchRes.get();
+        authorRepository.save(author);
+        return author;
     }
 
     @DeleteMapping("/api/v1/authors/{id}")

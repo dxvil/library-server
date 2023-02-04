@@ -30,13 +30,15 @@ public class BookContoller {
 
     @GetMapping("/api/v1/books/{id}")
     public Book getSingleBook(@PathVariable UUID id) {
-        Optional<Book> resultOfSearch = bookRepository.findById(id);
+        Optional<Book> searchResult = bookRepository.findById(id);
 
-        if(resultOfSearch.isEmpty()) {
+        if(searchResult.isEmpty()) {
             throw new RuntimeException("The book with id: " + id + " is not found.");
         }
 
-        return resultOfSearch.get();
+        Book book = searchResult.get();
+
+        return book;
     }
 
     @PostMapping("/api/v1/books/")
@@ -47,18 +49,19 @@ public class BookContoller {
     }
 
     @PutMapping("/api/v1/books/{id}")
-    public Book editBook(@PathVariable UUID id, @RequestBody Book book) {
-        Optional<Book> resultOfSearch = bookRepository.findById(id);
+    public Book editBook(@PathVariable UUID id, @RequestBody Book updatedBook) {
+        Optional<Book> searchResult = bookRepository.findById(id);
 
-        if(resultOfSearch.isEmpty()) {
+        if(searchResult.isEmpty()) {
             throw new RuntimeException("The book with id: " + id + " is not found.");
         }
 
-        resultOfSearch.get().setDescription(book.getDescription());
-        resultOfSearch.get().setTitle(book.getTitle());
-        bookRepository.save(resultOfSearch.get());
+        Book book = searchResult.get();
+        book.setDescription(updatedBook.getDescription());
+        book.setTitle(updatedBook.getTitle());
 
-        return resultOfSearch.get();
+        bookRepository.save(book);
+        return book;
     }
 
     @DeleteMapping("/api/v1/books/{id}")

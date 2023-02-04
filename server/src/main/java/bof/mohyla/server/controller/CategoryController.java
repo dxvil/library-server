@@ -29,7 +29,9 @@ public class CategoryController {
             throw new RuntimeException("Category with id: " + id + " is not found.");
         }
 
-        return searchResult.get();
+        Category category = searchResult.get();
+
+        return category;
     }
 
     @PostMapping("/api/v1/categories/")
@@ -40,17 +42,18 @@ public class CategoryController {
     }
 
     @PutMapping("/api/v1/categories/{id}")
-    public Category editCategory(@PathVariable UUID id, @RequestBody Category category) {
+    public Category editCategory(@PathVariable UUID id, @RequestBody Category updatedCategory) {
         Optional<Category> searchResult = categoryRepository.findById(id);
 
         if(searchResult.isEmpty()) {
             throw new RuntimeException("Category with id: " + id + " is not found.");
         }
 
-        searchResult.get().setName(category.getName());
-        categoryRepository.save(searchResult.get());
+        Category category = searchResult.get();
+        category.setName(updatedCategory.getName());
 
-        return searchResult.get();
+        categoryRepository.save(category);
+        return category;
     }
 
     @DeleteMapping("/api/v1/categories/{id}")
