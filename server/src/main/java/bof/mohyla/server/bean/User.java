@@ -1,5 +1,6 @@
 package bof.mohyla.server.bean;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 import jakarta.persistence.Column;

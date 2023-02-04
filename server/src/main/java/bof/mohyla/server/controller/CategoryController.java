@@ -1,9 +1,8 @@
 package bof.mohyla.server.controller;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
+import bof.mohyla.server.exception.CategoryExceptionController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +25,7 @@ public class CategoryController {
         Optional<Category> searchResult = categoryRepository.findById(id);
 
         if(searchResult.isEmpty()) {
-            throw new RuntimeException("Category with id: " + id + " is not found.");
+           throw new CategoryExceptionController.CategoryNotFoundException();
         }
 
         Category category = searchResult.get();
@@ -36,6 +35,18 @@ public class CategoryController {
 
     @PostMapping("/api/v1/categories/")
     public Category createNewCategory(@RequestBody Category newCategory){
+        boolean isEmptyTitle = newCategory.getName() == null ||
+                newCategory.getName().isEmpty();
+
+        if(isEmptyTitle) {
+            ArrayList<Object> errorList = new ArrayList<>();
+            HashMap<String, String> error = new HashMap<>();
+            error.put("name", "is required");
+            errorList.add(error);
+
+            throw new CategoryExceptionController.CategoryInvalidArgumentsException(errorList);
+        }
+
         categoryRepository.save(newCategory);
 
         return newCategory;
@@ -46,7 +57,19 @@ public class CategoryController {
         Optional<Category> searchResult = categoryRepository.findById(id);
 
         if(searchResult.isEmpty()) {
-            throw new RuntimeException("Category with id: " + id + " is not found.");
+            throw new CategoryExceptionController.CategoryNotFoundException();
+        }
+
+        boolean isEmptyTitle = updatedCategory.getName() == null ||
+                updatedCategory.getName().isEmpty();
+
+        if(isEmptyTitle) {
+            ArrayList<Object> errorList = new ArrayList<>();
+            HashMap<String, String> error = new HashMap<>();
+            error.put("name", "is required");
+            errorList.add(error);
+
+            throw new CategoryExceptionController.CategoryInvalidArgumentsException(errorList);
         }
 
         Category category = searchResult.get();

@@ -1,5 +1,6 @@
 package bof.mohyla.server.controller;
 
+import bof.mohyla.server.exception.BookExceptionController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,9 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import bof.mohyla.server.repository.BookRepository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import bof.mohyla.server.bean.Book;
 
@@ -33,7 +32,7 @@ public class BookContoller {
         Optional<Book> searchResult = bookRepository.findById(id);
 
         if(searchResult.isEmpty()) {
-            throw new RuntimeException("The book with id: " + id + " is not found.");
+            throw new BookExceptionController.BookNotFoundException();
         }
 
         Book book = searchResult.get();
@@ -43,6 +42,28 @@ public class BookContoller {
 
     @PostMapping("/api/v1/books/")
     public Book createNewBook(@RequestBody Book newBook) {
+        boolean isEmptyTitle = newBook.getTitle() == null || newBook.getTitle().isEmpty();
+        boolean isEmptyDescription = newBook.getDescription() == null || newBook.getDescription().isEmpty();
+
+        if(isEmptyTitle || isEmptyDescription) {
+            ArrayList<Object> errorList = new ArrayList<>();
+            HashMap<String, String> error = new HashMap<>();
+
+            if(isEmptyTitle) {
+                error.put("title", "is required");
+            }
+
+            if(isEmptyDescription) {
+                error.put("description", "is required");
+            }
+
+            errorList.add(error);
+
+            String message = "Missing required values.";
+
+            throw new BookExceptionController.BookInvalidArgumentsException(errorList, message);
+        }
+
         bookRepository.save(newBook);
 
         return newBook;
@@ -54,6 +75,20 @@ public class BookContoller {
 
         if(searchResult.isEmpty()) {
             throw new RuntimeException("The book with id: " + id + " is not found.");
+        }
+
+        if((updatedBook.getTitle() == null || updatedBook.getTitle().isEmpty())
+                && (updatedBook.getDescription() == null
+                || updatedBook.getDescription().isEmpty())) {
+
+            ArrayList<Object> errorList = new ArrayList<>();
+            HashMap<String, String> error = new HashMap<>();
+            error.put("arguments", "Title, Description");
+            errorList.add(error);
+
+            String message = "At least Title value should be not empty";
+
+            throw new BookExceptionController.BookInvalidArgumentsException(errorList, message);
         }
 
         Book book = searchResult.get();

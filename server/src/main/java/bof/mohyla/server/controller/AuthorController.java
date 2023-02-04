@@ -1,9 +1,8 @@
 package bof.mohyla.server.controller;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
+import bof.mohyla.server.exception.AuthorExceptionController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +30,7 @@ public class AuthorController {
         Optional<Author> searchResult = authorRepository.findById(id);
 
         if(searchResult.isEmpty()) {
-            throw new RuntimeException("Author with id: " + id + " is not found");
+            throw new AuthorExceptionController.AuthorNotFoundException();
         }
 
         Author author = searchResult.get();
@@ -41,6 +40,19 @@ public class AuthorController {
 
     @PostMapping("/api/v1/authors/")
     public Author createAuthor(@RequestBody Author author) {
+        boolean isEmptyName = author.getName() == null || author.getName().isEmpty();
+
+        if(isEmptyName) {
+            ArrayList<Object> errorList = new ArrayList<>();
+            HashMap<String, String> error = new HashMap<>();
+            error.put("name", "is required");
+            errorList.add(error);
+
+            throw new AuthorExceptionController.AuthorInvalidArgumentsException(
+                    errorList
+            );
+        }
+
         return authorRepository.save(author);
     }
 
@@ -49,7 +61,21 @@ public class AuthorController {
         Optional<Author> searchResult = authorRepository.findById(id);
         
         if(searchResult.isEmpty()) {
-            throw new RuntimeException("Author with id: " + id + " is not found");
+            throw new AuthorExceptionController.AuthorNotFoundException();
+        }
+
+        boolean isEmptyName = updatedAuthor.getName() == null
+                || updatedAuthor.getName().isEmpty();
+
+        if(isEmptyName) {
+            ArrayList<Object> errorList = new ArrayList<>();
+            HashMap<String, String> error = new HashMap<>();
+            error.put("name", "is required");
+            errorList.add(error);
+
+            throw new AuthorExceptionController.AuthorInvalidArgumentsException(
+                    errorList
+            );
         }
 
         Author author = searchResult.get();
