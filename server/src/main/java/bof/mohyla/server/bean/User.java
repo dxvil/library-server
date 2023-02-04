@@ -20,7 +20,7 @@ public class User {
 
     public User() {}
 
-    public User(String name) {
+    public User(String name, Role role) {
         super();
         this.name = name;
         this.role = role;
