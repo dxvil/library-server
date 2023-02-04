@@ -42,10 +42,11 @@ public class BookContoller {
 
     @PostMapping("/api/v1/books/")
     public Book createNewBook(@RequestBody Book newBook) {
-        boolean isEmptyTitle = newBook.getTitle() == null || newBook.getTitle().isEmpty();
-        boolean isEmptyDescription = newBook.getDescription() == null || newBook.getDescription().isEmpty();
+        boolean isEmptyTitle =newBook.getTitle() == null || newBook.getTitle().isEmpty();
+        boolean isEmptyAuthor = newBook.getAuthor() == null;
+        boolean isEmptyCategory = newBook.getCategory() == null;
 
-        if(isEmptyTitle || isEmptyDescription) {
+        if(isEmptyTitle || isEmptyAuthor || isEmptyCategory) {
             ArrayList<Object> errorList = new ArrayList<>();
             HashMap<String, String> error = new HashMap<>();
 
@@ -53,8 +54,12 @@ public class BookContoller {
                 error.put("title", "is required");
             }
 
-            if(isEmptyDescription) {
-                error.put("description", "is required");
+            if(isEmptyAuthor) {
+                error.put("author", "is required");
+            }
+
+            if(isEmptyCategory) {
+                error.put("category", "is required");
             }
 
             errorList.add(error);
@@ -63,6 +68,9 @@ public class BookContoller {
 
             throw new BookExceptionController.BookInvalidArgumentsException(errorList, message);
         }
+
+        //when you are creating a book, it cannot be immediately be borrowed
+        newBook.setBorrowed(false);
 
         bookRepository.save(newBook);
 
@@ -74,26 +82,46 @@ public class BookContoller {
         Optional<Book> searchResult = bookRepository.findById(id);
 
         if(searchResult.isEmpty()) {
-            throw new RuntimeException("The book with id: " + id + " is not found.");
+            throw new BookExceptionController.BookNotFoundException();
         }
 
-        if((updatedBook.getTitle() == null || updatedBook.getTitle().isEmpty())
-                && (updatedBook.getDescription() == null
-                || updatedBook.getDescription().isEmpty())) {
+        boolean isEmptyTitle =updatedBook.getTitle() == null || updatedBook.getTitle().isEmpty();
+        boolean isEmptyDescription = updatedBook.getDescription() == null ||
+                updatedBook.getDescription().isEmpty();
+        boolean isEmptyAuthor = updatedBook.getAuthor() == null;
+        boolean isEmptyCategory = updatedBook.getCategory() == null;
 
+        if(isEmptyTitle && isEmptyAuthor && isEmptyCategory && isEmptyDescription) {
             ArrayList<Object> errorList = new ArrayList<>();
             HashMap<String, String> error = new HashMap<>();
-            error.put("arguments", "Title, Description");
+
+            error.put("Missing fields", "Title, description, author, category");
+
             errorList.add(error);
 
-            String message = "At least Title value should be not empty";
+            String message = "At least one value should be not empty";
 
             throw new BookExceptionController.BookInvalidArgumentsException(errorList, message);
         }
 
         Book book = searchResult.get();
-        book.setDescription(updatedBook.getDescription());
-        book.setTitle(updatedBook.getTitle());
+
+        if(!isEmptyTitle) {
+            book.setTitle(updatedBook.getTitle());
+        }
+        if(!isEmptyDescription) {
+            book.setDescription(updatedBook.getDescription());
+        }
+        if(!isEmptyCategory) {
+            book.setCategory(updatedBook.getCategory());
+        }
+        if(!isEmptyAuthor) {
+            book.setAuthor(updatedBook.getAuthor());
+        }
+
+        // you cannot change status of book from this service
+        // you can do it throw checkout service
+        book.setBorrowed(book.isBorrowed());
 
         bookRepository.save(book);
         return book;
@@ -101,6 +129,10 @@ public class BookContoller {
 
     @DeleteMapping("/api/v1/books/{id}")
     public void deleteBook(@PathVariable UUID id) {
-        bookRepository.deleteById(id);
+        try {
+            bookRepository.deleteById(id);
+        } catch (BookExceptionController.BookNotFoundException ex){
+                throw new BookExceptionController.BookNotFoundException();
+        }
     }
 }
