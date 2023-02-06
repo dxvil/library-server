@@ -3,6 +3,8 @@ package bof.mohyla.server.bean;
 import java.util.UUID;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 public class Book {
@@ -14,9 +16,11 @@ public class Book {
     private boolean isBorrowed;
     //relations
     @ManyToOne(cascade = {CascadeType.ALL})
+    @OnDelete(action = OnDeleteAction.NO_ACTION)
     @JoinColumn(name = "category_id")
     private Category category;
     @ManyToOne(cascade = {CascadeType.ALL})
+    @OnDelete(action = OnDeleteAction.NO_ACTION)
     @JoinColumn(name = "author_id")
     private Author author;
 

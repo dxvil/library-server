@@ -1,6 +1,8 @@
 package bof.mohyla.server.bean;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -10,10 +12,12 @@ public class LibraryCheckout {
     @Id
     @GeneratedValue
     private UUID id;
-    @ManyToOne(cascade = {CascadeType.ALL})
+    @OneToOne(cascade = {CascadeType.ALL})
+    @OnDelete(action = OnDeleteAction.NO_ACTION)
     @JoinColumn(name = "user_id")
     private User user;
-    @ManyToOne(cascade = {CascadeType.ALL})
+    @OneToOne(cascade = {CascadeType.ALL})
+    @OnDelete(action = OnDeleteAction.NO_ACTION)
     @JoinColumn(name = "book_id")
     private Book book;
     public User getUser() {
@@ -21,6 +25,31 @@ public class LibraryCheckout {
     }
     private LocalDate startDate;
     private LocalDate endDate;
+    public boolean isReturned;
+
+    public LibraryCheckout(){};
+
+    public LibraryCheckout(
+            LocalDate startTime,
+            LocalDate endTime,
+            Book bookId,
+            User userId,
+            boolean isReturned
+    ) {
+        this.startDate = startTime;
+        this.endDate = endTime;
+        this.book = bookId;
+        this.user = userId;
+        this.isReturned = isReturned;
+    }
+
+    public boolean isReturned() {
+        return isReturned;
+    }
+
+    public void setReturned(boolean returned) {
+        isReturned = returned;
+    }
 
     public UUID getId() {
         return id;
