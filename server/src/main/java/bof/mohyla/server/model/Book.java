@@ -1,4 +1,4 @@
-package bof.mohyla.server.bean;
+package bof.mohyla.server.model;
 
 import java.util.UUID;
 
@@ -15,13 +15,13 @@ public class Book {
     private String description;
     private boolean isBorrowed;
     //relations
-    @ManyToOne(cascade = {CascadeType.ALL})
-    @OnDelete(action = OnDeleteAction.NO_ACTION)
+    @ManyToOne
     @JoinColumn(name = "category_id")
-    private Category category;
-    @ManyToOne(cascade = {CascadeType.ALL})
     @OnDelete(action = OnDeleteAction.NO_ACTION)
+    private Category category;
+    @ManyToOne
     @JoinColumn(name = "author_id")
+    @OnDelete(action = OnDeleteAction.NO_ACTION)
     private Author author;
 
     public Book() {}

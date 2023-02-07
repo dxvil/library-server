@@ -6,7 +6,7 @@ import bof.mohyla.server.exception.CategoryExceptionController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import bof.mohyla.server.bean.Category;
+import bof.mohyla.server.model.Category;
 
 import bof.mohyla.server.repository.CategoryRepository;
 

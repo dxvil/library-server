@@ -1,8 +1,8 @@
 package bof.mohyla.server.dto.mapper;
 
-import bof.mohyla.server.bean.Book;
-import bof.mohyla.server.bean.LibraryCheckout;
-import bof.mohyla.server.bean.User;
+import bof.mohyla.server.model.Book;
+import bof.mohyla.server.model.LibraryCheckout;
+import bof.mohyla.server.model.User;
 import bof.mohyla.server.dto.CheckoutReqDTO;
 import bof.mohyla.server.dto.CheckoutResDTO;
 import org.springframework.stereotype.Component;

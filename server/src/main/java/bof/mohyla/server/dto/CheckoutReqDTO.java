@@ -1,8 +1,6 @@
 package bof.mohyla.server.dto;
 
-import bof.mohyla.server.bean.Book;
-import bof.mohyla.server.bean.LibraryCheckout;
-import bof.mohyla.server.bean.User;
+import bof.mohyla.server.model.LibraryCheckout;
 
 import java.time.LocalDate;
 import java.util.UUID;

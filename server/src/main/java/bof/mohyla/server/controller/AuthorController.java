@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import bof.mohyla.server.bean.Author;
+import bof.mohyla.server.model.Author;
 import bof.mohyla.server.repository.AuthorRepository;
 
 @RestController

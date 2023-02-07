@@ -1,13 +1,13 @@
 package bof.mohyla.server.controller;
 
-import bof.mohyla.server.bean.User;
+import bof.mohyla.server.model.User;
 import bof.mohyla.server.exception.UserExceptionController;
 import bof.mohyla.server.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import bof.mohyla.server.bean.Role;
-import javax.swing.text.html.Option;
+import bof.mohyla.server.model.Role;
+
 import java.util.*;
 
 @RestController

@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import bof.mohyla.server.bean.Author;
+import bof.mohyla.server.model.Author;
 
 
 public interface AuthorRepository extends JpaRepository<Author, UUID> {

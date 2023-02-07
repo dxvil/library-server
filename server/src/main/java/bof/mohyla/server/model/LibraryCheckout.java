@@ -1,4 +1,4 @@
-package bof.mohyla.server.bean;
+package bof.mohyla.server.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
