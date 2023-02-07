@@ -5,6 +5,7 @@ import java.util.UUID;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "authors")
 public class Author {
     @Id
     @GeneratedValue
