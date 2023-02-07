@@ -12,11 +12,12 @@ public class LibraryCheckout {
     @Id
     @GeneratedValue
     private UUID id;
-    @OneToOne(cascade = {CascadeType.ALL})
+
+    @ManyToOne(cascade = {CascadeType.ALL})
     @OnDelete(action = OnDeleteAction.NO_ACTION)
     @JoinColumn(name = "user_id")
     private User user;
-    @OneToOne(cascade = {CascadeType.ALL})
+    @ManyToOne(cascade = {CascadeType.ALL})
     @OnDelete(action = OnDeleteAction.NO_ACTION)
     @JoinColumn(name = "book_id")
     private Book book;
@@ -30,16 +31,16 @@ public class LibraryCheckout {
     public LibraryCheckout(){};
 
     public LibraryCheckout(
-            LocalDate startTime,
-            LocalDate endTime,
             Book bookId,
             User userId,
+            LocalDate startTime,
+            LocalDate endTime,
             boolean isReturned
     ) {
-        this.startDate = startTime;
-        this.endDate = endTime;
         this.book = bookId;
         this.user = userId;
+        this.startDate = startTime;
+        this.endDate = endTime;
         this.isReturned = isReturned;
     }
 

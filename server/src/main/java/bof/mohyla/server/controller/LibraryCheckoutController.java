@@ -5,6 +5,7 @@ import bof.mohyla.server.bean.LibraryCheckout;
 import bof.mohyla.server.bean.User;
 import bof.mohyla.server.dto.CheckoutReqDTO;
 import bof.mohyla.server.dto.CheckoutResDTO;
+import bof.mohyla.server.dto.mapper.CheckoutMapper;
 import bof.mohyla.server.exception.BookExceptionController;
 import bof.mohyla.server.exception.LibraryCheckoutExceptionController;
 import bof.mohyla.server.exception.UserExceptionController;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 public class LibraryCheckoutController {
@@ -26,9 +28,12 @@ public class LibraryCheckoutController {
     @Autowired
     BookRepository bookRepository;
 
+    @Autowired
+    CheckoutMapper mapper;
+
     @GetMapping("/api/v1/libCheckout/")
-    public List<LibraryCheckout> getListOfCheckout() {
-        return libraryRepository.findAll();
+    public List<CheckoutResDTO> getListOfCheckout() {
+        return libraryRepository.findAll().stream().map(checkout -> mapper.toCheckoutRes(checkout)).collect(Collectors.toList());
     }
     @GetMapping("/api/v1/libCheckout/{id}")
     public CheckoutResDTO getSingleCheckout(@PathVariable UUID id) {
@@ -40,17 +45,9 @@ public class LibraryCheckoutController {
 
         LibraryCheckout checkout = searchResult.get();
 
-        CheckoutResDTO res = new CheckoutResDTO();
-
-        res.setUserId(checkout.getUser().getId());
-        res.setBookId(checkout.getBook().getId());
-        res.setId(checkout.getId());
-        res.setReturned(checkout.isReturned());
-        res.setStartDate(checkout.getStartDate());
-        res.setEndDate(checkout.getEndDate());
-
-        return res;
+        return mapper.toCheckoutRes(checkout);
     }
+
     @PostMapping("/api/v1/libCheckout/")
     public CheckoutResDTO borrowBook(@RequestBody CheckoutReqDTO libraryCheckout) {
         boolean isEmptyUser = libraryCheckout.getUserId() == null;
@@ -91,8 +88,6 @@ public class LibraryCheckoutController {
             throw new BookExceptionController.BookNotFoundException();
         }
 
-        //give a book for 2 months
-        LocalDate endDate = libraryCheckout.getStartDate().plusMonths(2);
         Book book = searchBookResult.get();
         User user = searchUserResult.get();
 
@@ -105,30 +100,18 @@ public class LibraryCheckoutController {
             throw new LibraryCheckoutExceptionController.LibraryCheckoutInvalidArgumentsException(errorList);
         }
 
-        LibraryCheckout checkout = new LibraryCheckout();
-
-        checkout.setBook(book);
-        checkout.setUser(user);
-        checkout.setStartDate(libraryCheckout.getStartDate());
-        checkout.setEndDate(endDate);
-        checkout.setReturned(false);
+        //give a book for 2 months
+        LocalDate endDate = libraryCheckout.getStartDate().plusMonths(2);
 
         book.setBorrowed(true);
+
+        LibraryCheckout checkout = mapper.toCheckout(libraryCheckout, book, user, endDate, false);
 
         bookRepository.save(book);
         libraryRepository.save(checkout);
 
         //create res based on dto
-        CheckoutResDTO res = new CheckoutResDTO();
-
-        res.setUserId(libraryCheckout.getUserId());
-        res.setBookId(libraryCheckout.getBookId());
-        res.setId(checkout.getId());
-        res.setReturned(checkout.isReturned());
-        res.setStartDate(checkout.getStartDate());
-        res.setEndDate(checkout.getEndDate());
-
-        return res;
+        return mapper.toCheckoutRes(checkout);
     }
 
     @PutMapping("/api/v1/libCheckout/{id}")
@@ -163,14 +146,6 @@ public class LibraryCheckoutController {
         libraryRepository.save(checkout);
         bookRepository.save(book);
 
-        CheckoutResDTO res = new CheckoutResDTO();
-        res.setUserId(checkout.getUser().getId());
-        res.setBookId(checkout.getBook().getId());
-        res.setId(checkout.getId());
-        res.setReturned(checkout.isReturned());
-        res.setStartDate(checkout.getStartDate());
-        res.setEndDate(checkout.getEndDate());
-
-        return res;
+        return mapper.toCheckoutRes(checkout);
     }
 }

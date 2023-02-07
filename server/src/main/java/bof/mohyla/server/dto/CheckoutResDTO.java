@@ -13,6 +13,15 @@ public class CheckoutResDTO {
     private LocalDate endDate;
     private boolean isReturned;
 
+    public CheckoutResDTO(UUID id, UUID userId, UUID bookId, LocalDate startDate, LocalDate endDate, boolean isReturned) {
+        this.id = id;
+        this.userId = userId;
+        this.bookId = bookId;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.isReturned = isReturned;
+    }
+
     public UUID getId() {
         return id;
     }
