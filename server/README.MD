@@ -29,6 +29,6 @@ PS. if your goal is advanced and you haven't built a Spring Boot application bef
 
 **Advanced (Optional)**
 
-* Handle authentication via Spring Security, ie create a signing/signup routes where you send back token depending on the user if it's normie or admin user.
-* Build authorization a role-based-system with Admin and User or more privileges
+* Handle authentication via Spring Security, ie create a signing/signup routes where you send back token depending on the user if it's normie or admin user. +
+* Build authorization a role-based-system with Admin and User or more privileges +
 * Run your application and DataBase from Docker +-
