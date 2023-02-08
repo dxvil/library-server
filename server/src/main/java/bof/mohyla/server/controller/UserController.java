@@ -1,12 +1,15 @@
 package bof.mohyla.server.controller;
 
 import bof.mohyla.server.config.JWTService;
+import bof.mohyla.server.config.JwtAuthentificationFilter;
 import bof.mohyla.server.model.User;
 import bof.mohyla.server.exception.UserExceptionController;
 import bof.mohyla.server.repository.UserRepository;
 import com.auth0.jwt.interfaces.Claim;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,7 +32,7 @@ public class UserController {
     private AuthenticationManager authenticationManager;
     @Autowired
     private PasswordEncoder passwordEncoder;
-
+    private static Logger logger = LoggerFactory.getLogger(JwtAuthentificationFilter.class);
     @GetMapping("/users")
     public  ResponseEntity<List<User>> getListOfUsers() {
         return  ResponseEntity.ok(userRepository.findAll());
@@ -177,10 +180,9 @@ public class UserController {
         final String authHeader = request.getHeader("Authorization");
         final String jwt = authHeader.substring(7);
         final Claims claims = jwtService.extractAllClaims(jwt);
-//
-//        if(Objects.equals(claims., Role.ADMIN.value)){
-//            userRepository.deleteById(id);
-//        }
 
+        if(Objects.equals(claims.get("role"), Role.ADMIN.value)){
+            userRepository.deleteById(id);
+        }
     }
 }
