@@ -1,9 +1,17 @@
 package bof.mohyla.server.controller;
 
+import bof.mohyla.server.config.JWTService;
 import bof.mohyla.server.model.User;
 import bof.mohyla.server.exception.UserExceptionController;
 import bof.mohyla.server.repository.UserRepository;
+import com.auth0.jwt.interfaces.Claim;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import bof.mohyla.server.model.Role;
@@ -11,42 +19,58 @@ import bof.mohyla.server.model.Role;
 import java.util.*;
 
 @RestController
+@RequestMapping("/api/v1/auth")
 public class UserController {
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
+    @Autowired
+    private JWTService jwtService;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    @GetMapping("/api/v1/users/")
-    public List<User> getListOfUsers() {
-        return userRepository.findAll();
+    @GetMapping("/users")
+    public  ResponseEntity<List<User>> getListOfUsers() {
+        return  ResponseEntity.ok(userRepository.findAll());
     }
 
-    @GetMapping("/api/v1/users/{id}")
-    public User getSingleUser(@PathVariable UUID id) {
+    @GetMapping("/users/{id}")
+    public  ResponseEntity<User> getSingleUser(@PathVariable UUID id) {
         Optional<User> searchResult =userRepository.findById(id);
 
         if(searchResult.isEmpty()) {
             throw new UserExceptionController.UserNotFoundException();
         }
 
-        return searchResult.get();
+        return  ResponseEntity.ok(searchResult.get());
     }
 
-    @PostMapping("/api/v1/users/")
-    public User createNewUser(@RequestBody User newUser) {
-        boolean isEmptyName = newUser.getName() == null ||
-                newUser.getName().isEmpty();
+    @PostMapping("/")
+    public String createNewUser(@RequestBody User newUser) {
+        boolean isEmptyName = newUser.getName() == null || newUser.getName().isEmpty();
         boolean isEmptyRole = newUser.getRole() == null ||
                 (newUser.getRole() != null &&
                         newUser.getRole().getValue() != null &&
                         newUser.getRole().getValue().isEmpty()
                 );
+        boolean isEmptyEmail = newUser.getEmail() == null || newUser.getEmail().isEmpty();
+        boolean isEmptyPassword = newUser.getPassword() == null || newUser.getPassword().isEmpty();
 
-        if(isEmptyName || isEmptyRole) {
+        if(isEmptyName || isEmptyRole || isEmptyEmail || isEmptyPassword) {
             ArrayList<Object> errorList = new ArrayList<>();
             HashMap<String, String> error = new HashMap<>();
 
             if(isEmptyName) {
                 error.put("name", "is required");
+            }
+
+            if(isEmptyEmail) {
+                error.put("email", "is required");
+            }
+
+            if(isEmptyPassword) {
+                error.put("password", "is required");
             }
 
             if(isEmptyRole) {
@@ -63,13 +87,46 @@ public class UserController {
             throw new UserExceptionController.UserInvalidArgumentsException(errorList);
         }
 
-        userRepository.save(newUser);
+        User user = new User(
+                newUser.getName(),
+                newUser.getRole(),
+                newUser.getEmail(),
+                passwordEncoder.encode(newUser.getPassword())
+        );
 
-        return newUser;
+        var jwtToken = jwtService.generateToken(user);
+
+        userRepository.save(user);
+
+        return jwtToken;
     }
 
-    @PutMapping("/api/v1/users/{id}")
-    public User editUser(@PathVariable UUID id, @RequestBody User updatedUser) {
+    @PostMapping("/login")
+    public String login(@RequestHeader String email, @RequestHeader String password) {
+        Optional<User> searchUser = userRepository.findByEmail(email);
+
+        if(searchUser.isEmpty()){
+            throw new UserExceptionController.UserNotFoundException();
+        }
+
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        email,
+                        password
+                )
+        );
+        User user = searchUser.get();
+
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", user.getRole().value);
+
+        String token = jwtService.generateToken(claims, user);
+
+        return token;
+    }
+
+    @PutMapping("/users/{id}")
+    public  ResponseEntity<User> editUser(@PathVariable UUID id, @RequestBody User updatedUser) {
         Optional<User> searchResult = userRepository.findById(id);
 
         if(searchResult.isEmpty()) {
@@ -111,11 +168,19 @@ public class UserController {
         user.setRole(updatedUser.getRole());
 
         userRepository.save(user);
-        return user;
+        return  ResponseEntity.ok(user);
     }
 
-    @DeleteMapping("/api/v1/users/{id}")
-    public void deleteUser(@PathVariable UUID id) {
-        userRepository.deleteById(id);
+    @DeleteMapping("/users/{id}")
+    public void deleteUser(@PathVariable UUID id, HttpServletRequest request) {
+        //don't need an extra validation, because we are already sign-in
+        final String authHeader = request.getHeader("Authorization");
+        final String jwt = authHeader.substring(7);
+        final Claims claims = jwtService.extractAllClaims(jwt);
+//
+//        if(Objects.equals(claims., Role.ADMIN.value)){
+//            userRepository.deleteById(id);
+//        }
+
     }
 }

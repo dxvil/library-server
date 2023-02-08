@@ -11,6 +11,7 @@ import bof.mohyla.server.exception.CategoryExceptionController;
 import bof.mohyla.server.repository.AuthorRepository;
 import bof.mohyla.server.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,12 +42,18 @@ public class BookContoller {
     private CategoryRepository categoryRepository;
 
     @GetMapping("/api/v1/books/")
-    public List<BookResDTO> getListOfBooks() {
-        return bookRepository.findAll().stream().map(book -> mapper.toDTO(book)).collect(Collectors.toList());
+    public ResponseEntity<List<BookResDTO>> getListOfBooks() {
+        return
+                ResponseEntity.ok(bookRepository
+                        .findAll()
+                        .stream()
+                        .map(book -> mapper.toDTO(book))
+                        .collect(Collectors.toList())
+                );
     }
 
     @GetMapping("/api/v1/books/{id}")
-    public Book getSingleBook(@PathVariable UUID id) {
+    public ResponseEntity<Book> getSingleBook(@PathVariable UUID id) {
         Optional<Book> searchResult = bookRepository.findById(id);
 
         if(searchResult.isEmpty()) {
@@ -55,11 +62,11 @@ public class BookContoller {
 
         Book book = searchResult.get();
 
-        return book;
+        return ResponseEntity.ok(book);
     }
 
     @PostMapping("/api/v1/books/")
-    public BookResDTO createNewBook(@RequestBody BookDTO newBook) {
+    public ResponseEntity<BookResDTO> createNewBook(@RequestBody BookDTO newBook) {
         boolean isEmptyTitle =newBook.getTitle() == null || newBook.getTitle().isEmpty();
         boolean isEmptyAuthor = newBook.getAuthorId() == null;
         boolean isEmptyCategory = newBook.getCategoryId() == null;
@@ -108,11 +115,11 @@ public class BookContoller {
 
         bookRepository.save(book);
 
-        return mapper.toDTO(book);
+        return ResponseEntity.ok(mapper.toDTO(book));
     }
 
     @PutMapping("/api/v1/books/{id}")
-    public BookResDTO editBook(@PathVariable UUID id, @RequestBody BookDTO updatedBook) {
+    public ResponseEntity<BookResDTO> editBook(@PathVariable UUID id, @RequestBody BookDTO updatedBook) {
         Optional<Book> searchResult = bookRepository.findById(id);
 
         if(searchResult.isEmpty()) {
@@ -170,7 +177,7 @@ public class BookContoller {
 
         bookRepository.save(book);
 
-        return mapper.toDTO(book);
+        return ResponseEntity.ok(mapper.toDTO(book));
     }
 
     @DeleteMapping("/api/v1/books/{id}")
