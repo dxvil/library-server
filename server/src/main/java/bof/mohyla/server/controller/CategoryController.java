@@ -4,9 +4,10 @@ import java.util.*;
 
 import bof.mohyla.server.exception.CategoryExceptionController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import bof.mohyla.server.bean.Category;
+import bof.mohyla.server.model.Category;
 
 import bof.mohyla.server.repository.CategoryRepository;
 
@@ -21,7 +22,7 @@ public class CategoryController {
     }
 
     @GetMapping("/api/v1/categories/{id}")
-    public Category getSingleCategory(@PathVariable UUID id) {
+    public ResponseEntity<Category> getSingleCategory(@PathVariable UUID id) {
         Optional<Category> searchResult = categoryRepository.findById(id);
 
         if(searchResult.isEmpty()) {
@@ -30,11 +31,11 @@ public class CategoryController {
 
         Category category = searchResult.get();
 
-        return category;
+        return ResponseEntity.ok(category);
     }
 
     @PostMapping("/api/v1/categories/")
-    public Category createNewCategory(@RequestBody Category newCategory){
+    public ResponseEntity<Category> createNewCategory(@RequestBody Category newCategory){
         boolean isEmptyTitle = newCategory.getName() == null ||
                 newCategory.getName().isEmpty();
 
@@ -49,11 +50,11 @@ public class CategoryController {
 
         categoryRepository.save(newCategory);
 
-        return newCategory;
+        return ResponseEntity.ok(newCategory);
     }
 
     @PutMapping("/api/v1/categories/{id}")
-    public Category editCategory(@PathVariable UUID id, @RequestBody Category updatedCategory) {
+    public ResponseEntity<Category> editCategory(@PathVariable UUID id, @RequestBody Category updatedCategory) {
         Optional<Category> searchResult = categoryRepository.findById(id);
 
         if(searchResult.isEmpty()) {
@@ -76,7 +77,7 @@ public class CategoryController {
         category.setName(updatedCategory.getName());
 
         categoryRepository.save(category);
-        return category;
+        return ResponseEntity.ok(category);
     }
 
     @DeleteMapping("/api/v1/categories/{id}")

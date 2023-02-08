@@ -1,4 +1,4 @@
-package bof.mohyla.server.bean;
+package bof.mohyla.server.model;
 
 public enum Role {
     ADMIN("admin"),

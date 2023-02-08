@@ -1,12 +1,11 @@
-package bof.mohyla.server.bean;
+package bof.mohyla.server.model;
 
 import java.util.UUID;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
+@Table(name = "authors")
 public class Author {
     @Id
     @GeneratedValue

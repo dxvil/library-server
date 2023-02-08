@@ -4,6 +4,7 @@ import java.util.*;
 
 import bof.mohyla.server.exception.AuthorExceptionController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import bof.mohyla.server.bean.Author;
+import bof.mohyla.server.model.Author;
 import bof.mohyla.server.repository.AuthorRepository;
 
 @RestController
@@ -26,7 +27,7 @@ public class AuthorController {
     }
 
     @GetMapping("/api/v1/authors/{id}")
-    public Author getSingleAuthor(@PathVariable UUID id) {
+    public ResponseEntity<Author> getSingleAuthor(@PathVariable UUID id) {
         Optional<Author> searchResult = authorRepository.findById(id);
 
         if(searchResult.isEmpty()) {
@@ -35,11 +36,11 @@ public class AuthorController {
 
         Author author = searchResult.get();
 
-        return author;
+        return ResponseEntity.ok(author);
     }
 
     @PostMapping("/api/v1/authors/")
-    public Author createAuthor(@RequestBody Author author) {
+    public ResponseEntity<Author> createAuthor(@RequestBody Author author) {
         boolean isEmptyName = author.getName() == null || author.getName().isEmpty();
 
         if(isEmptyName) {
@@ -53,11 +54,12 @@ public class AuthorController {
             );
         }
 
-        return authorRepository.save(author);
+
+        return ResponseEntity.ok(authorRepository.save(author));
     }
 
     @PutMapping("/api/v1/authors/{id}")
-    public Author editAuthor(@PathVariable UUID id, @RequestBody Author updatedAuthor) {
+    public ResponseEntity<Author> editAuthor(@PathVariable UUID id, @RequestBody Author updatedAuthor) {
         Optional<Author> searchResult = authorRepository.findById(id);
         
         if(searchResult.isEmpty()) {
@@ -82,7 +84,7 @@ public class AuthorController {
         author.setName(updatedAuthor.getName());
 
         authorRepository.save(author);
-        return author;
+        return ResponseEntity.ok(author);
     }
 
     @DeleteMapping("/api/v1/authors/{id}")

@@ -1,4 +1,4 @@
-package bof.mohyla.server.bean;
+package bof.mohyla.server.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
+@Table(name = "checkouts")
 public class LibraryCheckout {
     @Id
     @GeneratedValue

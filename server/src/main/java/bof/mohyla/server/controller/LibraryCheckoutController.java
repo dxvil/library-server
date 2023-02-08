@@ -1,8 +1,8 @@
 package bof.mohyla.server.controller;
 
-import bof.mohyla.server.bean.Book;
-import bof.mohyla.server.bean.LibraryCheckout;
-import bof.mohyla.server.bean.User;
+import bof.mohyla.server.model.Book;
+import bof.mohyla.server.model.LibraryCheckout;
+import bof.mohyla.server.model.User;
 import bof.mohyla.server.dto.CheckoutReqDTO;
 import bof.mohyla.server.dto.CheckoutResDTO;
 import bof.mohyla.server.dto.mapper.CheckoutMapper;
@@ -13,6 +13,7 @@ import bof.mohyla.server.repository.BookRepository;
 import bof.mohyla.server.repository.LibraryCheckoutRepository;
 import bof.mohyla.server.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -32,11 +33,16 @@ public class LibraryCheckoutController {
     CheckoutMapper mapper;
 
     @GetMapping("/api/v1/libCheckout/")
-    public List<CheckoutResDTO> getListOfCheckout() {
-        return libraryRepository.findAll().stream().map(checkout -> mapper.toCheckoutRes(checkout)).collect(Collectors.toList());
+    public ResponseEntity<List<CheckoutResDTO>> getListOfCheckout() {
+        return ResponseEntity.ok(libraryRepository
+                .findAll()
+                .stream()
+                .map(checkout -> mapper.toCheckoutRes(checkout))
+                .collect(Collectors.toList())
+        );
     }
     @GetMapping("/api/v1/libCheckout/{id}")
-    public CheckoutResDTO getSingleCheckout(@PathVariable UUID id) {
+    public ResponseEntity<CheckoutResDTO> getSingleCheckout(@PathVariable UUID id) {
         Optional<LibraryCheckout> searchResult = libraryRepository.findById(id);
 
         if(searchResult.isEmpty()) {
@@ -45,11 +51,11 @@ public class LibraryCheckoutController {
 
         LibraryCheckout checkout = searchResult.get();
 
-        return mapper.toCheckoutRes(checkout);
+        return ResponseEntity.ok(mapper.toCheckoutRes(checkout));
     }
 
     @PostMapping("/api/v1/libCheckout/")
-    public CheckoutResDTO borrowBook(@RequestBody CheckoutReqDTO libraryCheckout) {
+    public ResponseEntity<CheckoutResDTO> borrowBook(@RequestBody CheckoutReqDTO libraryCheckout) {
         boolean isEmptyUser = libraryCheckout.getUserId() == null;
         boolean isEmptyBook = libraryCheckout.getBookId() == null;
         boolean isEmptyStartDate = libraryCheckout.getStartDate() == null;
@@ -111,11 +117,11 @@ public class LibraryCheckoutController {
         libraryRepository.save(checkout);
 
         //create res based on dto
-        return mapper.toCheckoutRes(checkout);
+        return ResponseEntity.ok(mapper.toCheckoutRes(checkout));
     }
 
     @PutMapping("/api/v1/libCheckout/{id}")
-    public CheckoutResDTO returnBook(@PathVariable UUID id) {
+    public  ResponseEntity<CheckoutResDTO> returnBook(@PathVariable UUID id) {
         if(id == null) {
             ArrayList<Object> errorList = new ArrayList<>();
             HashMap<String, String> error = new HashMap<>();
@@ -146,6 +152,6 @@ public class LibraryCheckoutController {
         libraryRepository.save(checkout);
         bookRepository.save(book);
 
-        return mapper.toCheckoutRes(checkout);
+        return  ResponseEntity.ok(mapper.toCheckoutRes(checkout));
     }
 }
